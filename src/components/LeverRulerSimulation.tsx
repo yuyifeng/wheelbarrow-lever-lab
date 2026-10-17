@@ -1,6 +1,13 @@
-import { Minus, MoveHorizontal, Plus, Scale } from "lucide-react";
+import {
+  Minus,
+  MoveHorizontal,
+  Plus,
+  Scale,
+  SearchCheck,
+} from "lucide-react";
 import {
   useRef,
+  useState,
   type CSSProperties,
   type KeyboardEvent,
   type PointerEvent,
@@ -47,6 +54,9 @@ export function LeverRulerSimulation({
 }: LeverRulerSimulationProps) {
   const { state, result } = experiment;
   const stageRef = useRef<HTMLDivElement>(null);
+  const [revealedArms, setRevealedArms] = useState<string | null>(null);
+  const currentArms = `${state.leftDistance}-${state.rightDistance}`;
+  const isLeverTypeVisible = revealedArms === currentArms;
   const rulerStyle = {
     "--ruler-angle": `${result.angle}deg`,
     "--ruler-counter-angle": `${-result.angle}deg`,
@@ -229,9 +239,22 @@ export function LeverRulerSimulation({
             {result.rightMoment}
           </strong>
           <b>{outcomeText[result.outcome]}</b>
-          <div className={`lever-type lever-type--${result.leverType}`}>
-            <em>{leverTypeText[result.leverType]}</em>
-            <small>{leverTypeReason[result.leverType]}</small>
+          <div className="lever-type-slot" aria-live="polite">
+            {isLeverTypeVisible ? (
+              <div className={`lever-type lever-type--${result.leverType}`}>
+                <em>{leverTypeText[result.leverType]}</em>
+                <small>{leverTypeReason[result.leverType]}</small>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="lever-type-button"
+                onClick={() => setRevealedArms(currentArms)}
+              >
+                <SearchCheck aria-hidden="true" />
+                判断杠杆类型
+              </button>
+            )}
           </div>
         </section>
         {renderCountControl("right")}
