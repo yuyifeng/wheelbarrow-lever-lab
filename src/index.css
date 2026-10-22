@@ -752,6 +752,50 @@ tbody tr:nth-child(even) {
   margin-top: 2px;
 }
 
+.lever-role-selector {
+  display: flex;
+  min-height: 62px;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--line);
+  background: #f6f8f5;
+  padding: 10px 16px;
+}
+
+.lever-role-selector > strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.lever-role-options {
+  display: grid;
+  grid-template-columns: repeat(2, 72px);
+  overflow: hidden;
+  border: 1px solid #9eb5b0;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.lever-role-options button {
+  min-height: 38px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.lever-role-options button + button {
+  border-left: 1px solid #c7d9d4;
+}
+
+.lever-role-options button.is-active {
+  background: var(--danger);
+  color: #fff;
+}
+
 .lever-ruler-stage {
   position: relative;
   min-height: 500px;
@@ -940,11 +984,11 @@ tbody tr:nth-child(even) {
   height: 15px;
 }
 
-.hook-group--left {
+.hook-group--resistance {
   color: var(--primary-dark);
 }
 
-.hook-group--right {
+.hook-group--effort {
   color: var(--danger-dark);
 }
 
@@ -1003,13 +1047,13 @@ tbody tr:nth-child(even) {
   content: "";
 }
 
-.hook-group--left .hook-weight {
+.hook-group--resistance .hook-weight {
   border-color: var(--primary-dark);
   background: var(--primary);
   box-shadow: 0 3px 0 var(--primary-dark);
 }
 
-.hook-group--left .hook-weight::before {
+.hook-group--resistance .hook-weight::before {
   border-color: var(--primary-dark);
 }
 
@@ -1084,7 +1128,7 @@ tbody tr:nth-child(even) {
   cursor: pointer;
 }
 
-.hook-control--right .hook-stepper button {
+.hook-control--effort .hook-stepper button {
   background: var(--danger);
 }
 

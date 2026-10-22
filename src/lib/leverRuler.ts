@@ -7,11 +7,13 @@ export interface LeverRulerState {
   leftDistance: number;
   rightCount: number;
   rightDistance: number;
+  effortSide: LeverSide;
 }
 
 export type LeverRulerAction =
   | { type: "set-distance"; side: LeverSide; distance: number }
-  | { type: "change-count"; side: LeverSide; delta: number };
+  | { type: "change-count"; side: LeverSide; delta: number }
+  | { type: "set-effort-side"; side: LeverSide };
 
 export interface LeverRulerResult {
   leftMoment: number;
@@ -22,7 +24,7 @@ export interface LeverRulerResult {
 }
 
 export const MIN_HOOK_COUNT = 1;
-export const MAX_HOOK_COUNT = 5;
+export const MAX_HOOK_COUNT = 10;
 export const MIN_HOOK_DISTANCE = 1;
 export const MAX_HOOK_DISTANCE = 5;
 
@@ -31,6 +33,7 @@ export const createInitialLeverRulerState = (): LeverRulerState => ({
   leftDistance: 2,
   rightCount: 1,
   rightDistance: 4,
+  effortSide: "right",
 });
 
 const clampInteger = (value: number, min: number, max: number) =>
@@ -42,6 +45,14 @@ export function calculateLeverResult(
   const leftMoment = state.leftCount * state.leftDistance;
   const rightMoment = state.rightCount * state.rightDistance;
   const difference = rightMoment - leftMoment;
+  const effortDistance =
+    state.effortSide === "left"
+      ? state.leftDistance
+      : state.rightDistance;
+  const resistanceDistance =
+    state.effortSide === "left"
+      ? state.rightDistance
+      : state.leftDistance;
   const outcome: LeverOutcome =
     difference === 0
       ? "balanced"
@@ -49,9 +60,9 @@ export function calculateLeverResult(
         ? "right-down"
         : "left-down";
   const leverType: LeverType =
-    state.rightDistance === state.leftDistance
+    effortDistance === resistanceDistance
       ? "equal-arm"
-      : state.rightDistance > state.leftDistance
+      : effortDistance > resistanceDistance
         ? "effort-saving"
         : "effort-consuming";
   const angle =
@@ -67,6 +78,13 @@ export function leverRulerReducer(
   state: LeverRulerState,
   action: LeverRulerAction,
 ): LeverRulerState {
+  if (action.type === "set-effort-side") {
+    return {
+      ...state,
+      effortSide: action.side,
+    };
+  }
+
   if (action.type === "set-distance") {
     return {
       ...state,

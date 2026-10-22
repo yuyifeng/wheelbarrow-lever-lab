@@ -23,12 +23,14 @@ describe("leverRuler", () => {
       leftDistance: 3,
       rightCount: 1,
       rightDistance: 2,
+      effortSide: "right",
     });
     const rightHeavy = calculateLeverResult({
       leftCount: 1,
       leftDistance: 1,
       rightCount: 2,
       rightDistance: 4,
+      effortSide: "right",
     });
 
     expect(leftHeavy.outcome).toBe("left-down");
@@ -37,7 +39,7 @@ describe("leverRuler", () => {
     expect(rightHeavy.angle).toBeGreaterThan(0);
   });
 
-  it("clamps hook counts between one and five", () => {
+  it("clamps hook counts between one and ten", () => {
     const initial = createInitialLeverRulerState();
     const minimum = leverRulerReducer(initial, {
       type: "change-count",
@@ -51,7 +53,7 @@ describe("leverRuler", () => {
     });
 
     expect(minimum.rightCount).toBe(1);
-    expect(maximum.leftCount).toBe(5);
+    expect(maximum.leftCount).toBe(10);
   });
 
   it("rounds and clamps hook positions to the five ruler grids", () => {
@@ -76,22 +78,43 @@ describe("leverRuler", () => {
       leftDistance: 2,
       rightCount: 1,
       rightDistance: 4,
+      effortSide: "right",
     });
     const equalArm = calculateLeverResult({
       leftCount: 1,
       leftDistance: 3,
       rightCount: 1,
       rightDistance: 3,
+      effortSide: "right",
     });
     const effortConsuming = calculateLeverResult({
       leftCount: 1,
       leftDistance: 5,
       rightCount: 2,
       rightDistance: 2,
+      effortSide: "right",
+    });
+    const leftEffortSaving = calculateLeverResult({
+      leftCount: 1,
+      leftDistance: 5,
+      rightCount: 2,
+      rightDistance: 2,
+      effortSide: "left",
     });
 
     expect(effortSaving.leverType).toBe("effort-saving");
     expect(equalArm.leverType).toBe("equal-arm");
     expect(effortConsuming.leverType).toBe("effort-consuming");
+    expect(leftEffortSaving.leverType).toBe("effort-saving");
+  });
+
+  it("changes which side is the effort point", () => {
+    const state = leverRulerReducer(createInitialLeverRulerState(), {
+      type: "set-effort-side",
+      side: "left",
+    });
+
+    expect(state.effortSide).toBe("left");
+    expect(calculateLeverResult(state).leverType).toBe("effort-consuming");
   });
 });

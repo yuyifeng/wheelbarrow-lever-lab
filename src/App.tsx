@@ -19,7 +19,7 @@ export default function App() {
       <header className="page-heading">
         <Scale aria-hidden="true" />
         <div>
-          <h1>杠杆尺实验</h1>
+          <h1>杠杆实验</h1>
         </div>
       </header>
 

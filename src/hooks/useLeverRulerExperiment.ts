@@ -18,6 +18,8 @@ export function useLeverRulerExperiment() {
   return {
     state,
     result,
+    setEffortSide: (side: LeverSide) =>
+      dispatch({ type: "set-effort-side", side }),
     setDistance: (side: LeverSide, distance: number) =>
       dispatch({ type: "set-distance", side, distance }),
     changeCount: (side: LeverSide, delta: number) =>

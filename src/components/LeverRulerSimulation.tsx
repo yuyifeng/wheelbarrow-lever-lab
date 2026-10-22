@@ -32,11 +32,6 @@ const outcomeText: Record<LeverOutcome, string> = {
   "right-down": "右端下沉",
 };
 
-const sideText: Record<LeverSide, string> = {
-  left: "阻力点",
-  right: "用力点",
-};
-
 const leverTypeText: Record<LeverType, string> = {
   "effort-saving": "省力杠杆",
   "equal-arm": "等臂杠杆",
@@ -55,8 +50,12 @@ export function LeverRulerSimulation({
   const { state, result } = experiment;
   const stageRef = useRef<HTMLDivElement>(null);
   const [revealedArms, setRevealedArms] = useState<string | null>(null);
-  const currentArms = `${state.leftDistance}-${state.rightDistance}`;
+  const currentArms = `${state.effortSide}-${state.leftDistance}-${state.rightDistance}`;
   const isLeverTypeVisible = revealedArms === currentArms;
+  const getSideText = (side: LeverSide) =>
+    side === state.effortSide ? "用力点" : "阻力点";
+  const getRoleClass = (side: LeverSide) =>
+    side === state.effortSide ? "effort" : "resistance";
   const rulerStyle = {
     "--ruler-angle": `${result.angle}deg`,
     "--ruler-counter-angle": `${-result.angle}deg`,
@@ -125,6 +124,7 @@ export function LeverRulerSimulation({
   };
 
   const renderHookGroup = (side: LeverSide) => {
+    const pointText = getSideText(side);
     const count = side === "left" ? state.leftCount : state.rightCount;
     const distance =
       side === "left" ? state.leftDistance : state.rightDistance;
@@ -132,11 +132,11 @@ export function LeverRulerSimulation({
 
     return (
       <div
-        className={`hook-group hook-group--${side}`}
+        className={`hook-group hook-group--${side} hook-group--${getRoleClass(side)}`}
         style={{ left: `${position}%` }}
         role="slider"
         tabIndex={0}
-        aria-label={`${sideText[side]}钩码位置`}
+        aria-label={`${pointText}钩码位置`}
         aria-valuemin={1}
         aria-valuemax={5}
         aria-valuenow={distance}
@@ -147,7 +147,7 @@ export function LeverRulerSimulation({
       >
         <span className="hook-group__handle">
           <MoveHorizontal aria-hidden="true" />
-          {sideText[side]} {distance} 格
+          {pointText} {distance} 格
         </span>
         <span className="hook-group__line" />
         <span className="hook-group__hook" />
@@ -161,6 +161,7 @@ export function LeverRulerSimulation({
   };
 
   const renderCountControl = (side: LeverSide) => {
+    const pointText = getSideText(side);
     const count = side === "left" ? state.leftCount : state.rightCount;
     const distance =
       side === "left" ? state.leftDistance : state.rightDistance;
@@ -168,13 +169,15 @@ export function LeverRulerSimulation({
       side === "left" ? result.leftMoment : result.rightMoment;
 
     return (
-      <section className={`hook-control hook-control--${side}`}>
-        <strong>{sideText[side]}钩码</strong>
-        <div className="hook-stepper" aria-label={`${sideText[side]}钩码数量`}>
+      <section
+        className={`hook-control hook-control--${side} hook-control--${getRoleClass(side)}`}
+      >
+        <strong>{pointText}钩码</strong>
+        <div className="hook-stepper" aria-label={`${pointText}钩码数量`}>
           <button
             type="button"
             title="减少钩码"
-            aria-label={`减少${sideText[side]}钩码`}
+            aria-label={`减少${pointText}钩码`}
             disabled={count === MIN_HOOK_COUNT}
             onClick={() => experiment.changeCount(side, -1)}
           >
@@ -184,7 +187,7 @@ export function LeverRulerSimulation({
           <button
             type="button"
             title="增加钩码"
-            aria-label={`增加${sideText[side]}钩码`}
+            aria-label={`增加${pointText}钩码`}
             disabled={count === MAX_HOOK_COUNT}
             onClick={() => experiment.changeCount(side, 1)}
           >
@@ -200,6 +203,27 @@ export function LeverRulerSimulation({
 
   return (
     <div className="lever-ruler-experiment">
+      <div className="lever-role-selector">
+        <strong>用力点位置</strong>
+        <div
+          className="lever-role-options"
+          role="group"
+          aria-label="选择用力点位置"
+        >
+          {(["left", "right"] as const).map((side) => (
+            <button
+              type="button"
+              className={state.effortSide === side ? "is-active" : ""}
+              aria-pressed={state.effortSide === side}
+              key={side}
+              onClick={() => experiment.setEffortSide(side)}
+            >
+              {side === "left" ? "左侧" : "右侧"}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="lever-ruler-stage" ref={stageRef}>
         <div className="lever-ruler-status" aria-live="polite">
           <Scale aria-hidden="true" />
@@ -235,7 +259,12 @@ export function LeverRulerSimulation({
         <section className={`moment-result moment-result--${result.outcome}`}>
           <span>力矩比较</span>
           <strong>
-            {result.leftMoment} {result.outcome === "balanced" ? "=" : result.leftMoment > result.rightMoment ? ">" : "<"}{" "}
+            {result.leftMoment}{" "}
+            {result.outcome === "balanced"
+              ? "="
+              : result.leftMoment > result.rightMoment
+                ? ">"
+                : "<"}{" "}
             {result.rightMoment}
           </strong>
           <b>{outcomeText[result.outcome]}</b>
